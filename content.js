@@ -14,10 +14,6 @@ const css = `
 	}
 `;
 
-let styleElement = document.createElement("style");
-styleElement.textContent = css;
-document.head.appendChild(styleElement);
-
 function isSiteDark() {
 	const bodyStyles = window.getComputedStyle(document.body);
 	const backgroundColor = bodyStyles.backgroundColor;
@@ -65,16 +61,28 @@ function applyDarkMode(force) {
 	});
 }
 
-applyDarkMode(false);
+function init() {
+	let styleElement = document.createElement("style");
+	styleElement.textContent = css;
+	document.head.appendChild(styleElement);
 
-// Add event listener for the button to toggle dark mode manually
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	if (request.action === "toggleDarkMode") {
-		document.documentElement.classList.toggle(darkModeClass);
-		const isDark =
-			document.documentElement.classList.contains(darkModeClass);
-		chrome.storage.local.set({
-			[location.hostname]: isDark ? "dark" : "light",
-		});
-	}
-});
+	applyDarkMode(false);
+
+	// Add event listener for the button to toggle dark mode manually
+	chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+		if (request.action === "toggleDarkMode") {
+			document.documentElement.classList.toggle(darkModeClass);
+			const isDark =
+				document.documentElement.classList.contains(darkModeClass);
+			chrome.storage.local.set({
+				[location.hostname]: isDark ? "dark" : "light",
+			});
+		}
+	});
+}
+
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", init);
+} else {
+	init();
+}
