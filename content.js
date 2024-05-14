@@ -19,7 +19,6 @@ function isSiteDark() {
 	const backgroundColor = bodyStyles.backgroundColor;
 	const color = bodyStyles.color;
 
-	// Simple heuristic: Check if background is dark and text is light
 	const isDarkBackground = isColorDark(backgroundColor);
 	const isLightText = !isColorDark(color);
 
@@ -27,19 +26,21 @@ function isSiteDark() {
 }
 
 function isColorDark(color) {
-	if (!color) return false;
+	if (!color) {
+		return false;
+	}
 
-	// Extract RGB values
 	const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-	if (!match) return false;
+	if (!match) {
+		return false;
+	}
 
 	const r = parseInt(match[1]);
 	const g = parseInt(match[2]);
 	const b = parseInt(match[3]);
 
-	// Calculate luminance
 	const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-	return luminance < 128; // Threshold for darkness
+	return luminance < 128;
 }
 
 function applyDarkMode(force) {
@@ -47,15 +48,12 @@ function applyDarkMode(force) {
 		const userPreference = result[location.hostname];
 
 		if (userPreference === undefined) {
-			// No user preference, use heuristic
 			if (!isSiteDark() || force) {
 				document.documentElement.classList.add(darkModeClass);
 			}
 		} else if (userPreference === "dark") {
-			// User prefers dark mode
 			document.documentElement.classList.add(darkModeClass);
 		} else {
-			// User prefers light mode
 			document.documentElement.classList.remove(darkModeClass);
 		}
 	});
@@ -68,7 +66,6 @@ function init() {
 
 	applyDarkMode(false);
 
-	// Add event listener for the button to toggle dark mode manually
 	chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		if (request.action === "toggleDarkMode") {
 			document.documentElement.classList.toggle(darkModeClass);
