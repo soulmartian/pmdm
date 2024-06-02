@@ -14,57 +14,20 @@ const css = `
 	}
 `;
 
-function isSiteDark() {
-	const bodyStyles = window.getComputedStyle(document.body);
-	const backgroundColor = bodyStyles.backgroundColor;
-	const color = bodyStyles.color;
-
-	const isDarkBackground = isColorDark(backgroundColor);
-	const isLightText = !isColorDark(color);
-
-	return isDarkBackground && isLightText;
-}
-
-function isColorDark(color) {
-	if (!color) {
-		return false;
-	}
-
-	const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-	if (!match) {
-		return false;
-	}
-
-	const r = parseInt(match[1]);
-	const g = parseInt(match[2]);
-	const b = parseInt(match[3]);
-
-	const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-	return luminance < 128;
-}
-
-function applyDarkMode(force) {
-	chrome.storage.local.get([location.hostname], (result) => {
-		const userPreference = result[location.hostname];
-
-		if (userPreference === undefined) {
-			if (!isSiteDark() || force) {
-				document.documentElement.classList.add(darkModeClass);
-			}
-		} else if (userPreference === "dark") {
-			document.documentElement.classList.add(darkModeClass);
-		} else {
-			document.documentElement.classList.remove(darkModeClass);
-		}
-	});
-}
-
 function init() {
 	let styleElement = document.createElement("style");
 	styleElement.textContent = css;
 	document.head.appendChild(styleElement);
 
-	applyDarkMode(false);
+	chrome.storage.local.get([location.hostname], (result) => {
+		const userPreference = result[location.hostname];
+
+		if (userPreference === "dark") {
+			document.documentElement.classList.add(darkModeClass);
+		} else if (userPreference === "light") {
+			document.documentElement.classList.remove(darkModeClass);
+		}
+	});
 
 	chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		if (request.action === "toggleDarkMode") {
